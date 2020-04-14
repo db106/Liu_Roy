@@ -16,7 +16,7 @@ driver = Chrome('./chromedriver')
 url = 'https://www.google.com/webhp'
 count = 0
 search_tag_set = set()
-with open(r'E:\專題\景點名\台北.txt', 'r', encoding="utf-8") as f:
+with open(r'E:\專題\景點名\宜蘭景點.txt', 'r', encoding="utf-8") as f:
     f = f.readlines()
     for search_tag in f:
         search_tag = search_tag.replace('\n', '')
@@ -37,10 +37,23 @@ with open(r'E:\專題\景點名\台北.txt', 'r', encoding="utf-8") as f:
 
             soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-            a = soup.select('div[class="UYKlhc"]')
+            a = soup.select('div[class="UYKlhc"] b')
             # print(a)
             try:
-                stop_time = a[0].text
+                stop_time = a[0].text[:]
+
+                if stop_time[1] == "-":
+                    if stop_time[-2:] == "小時":
+                        stop_time = (float(stop_time[0])+float(stop_time[2]))*30
+                    else:
+                        stop_time = (float(stop_time[0]) + float(stop_time[2]))/2
+
+                elif stop_time[-2:] == "小時":
+                    stop_time = float(stop_time[:-2]) * 60
+
+                elif stop_time[-2:] == "分鐘":
+                    stop_time = float(stop_time[:-2])
+
             except:
                 stop_time = 'NA'
             count += 1
@@ -53,13 +66,14 @@ with open(r'E:\專題\景點名\台北.txt', 'r', encoding="utf-8") as f:
 
             save_data_js = json.dumps(save_data_dict, ensure_ascii=False)
 
-            with open(path_dir + '\\' + 'stop' + '.txt', 'a', encoding='utf8') as f:
+            with open(path_dir + '\\' + 'yilan_stop' + '.txt', 'a', encoding='utf8') as f:
                 f.write(save_data_js)
                 f.write('\n-----\n')
 
-
 count = str(count)
 # print(count)
+
+
 def lineNotifyMessage(token, msg):
     headers = {
         "Authorization": "Bearer " + token,
